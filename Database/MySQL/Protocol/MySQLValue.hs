@@ -1,4 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
 {-# OPTIONS_GHC -funbox-strict-fields #-}
 
 {-|
@@ -147,7 +146,7 @@ putParamMySQLType MySQLNull              = putFieldType mySQLTypeNull     >> put
 --------------------------------------------------------------------------------
 -- | Text protocol decoder
 getTextField :: ColumnDef -> Get MySQLValue
-getTextField !f
+getTextField f
     | t == mySQLTypeNull            = pure MySQLNull
     | t == mySQLTypeDecimal
         || t == mySQLTypeNewDecimal = feedLenEncBytes t MySQLDecimal fracLexer
@@ -186,13 +185,13 @@ getTextField !f
         || t == mySQLTypeLongBlob
         || t == mySQLTypeBlob
         || t == mySQLTypeVarString
-        || t == mySQLTypeString     = (seq () . if isText then MySQLText . T.decodeUtf8 else MySQLBytes) <$> getLenEncBytes
+        || t == mySQLTypeString     = (if isText then MySQLText . T.decodeUtf8 else MySQLBytes) <$> getLenEncBytes
 
     | t == mySQLTypeBit             = MySQLBit <$> (getBits =<< getLenEncInt)
 
     | otherwise                     = fail $ "Database.MySQL.Protocol.MySQLValue: missing text decoder for " ++ show t
   where
-    !t = columnType f
+    t = columnType f
     isUnsigned = flagUnsigned (columnFlags f)
     isText = columnCharSet f /= 63
     intLexer bs = fst <$> LexInt.readSigned LexInt.readDecimal bs
@@ -208,7 +207,7 @@ getTextField !f
         (mm, rest') <- LexInt.readDecimal (B.unsafeTail rest)
         (ss, _) <- LexFrac.readDecimal (B.unsafeTail rest')
         return (TimeOfDay hh mm ss)
-
+{-# INLINE getTextField #-}
 
 feedLenEncBytes :: FieldType -> (t -> b) -> (ByteString -> Maybe t) -> Get b
 feedLenEncBytes typ con parser = do
