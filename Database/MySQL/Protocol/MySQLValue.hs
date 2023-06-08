@@ -195,7 +195,7 @@ getTextField f
     | otherwise                     = fail $ "Database.MySQL.Protocol.MySQLValue: missing text decoder for " ++ show t
   where
     !t = columnType f
-    !isUnsigned field = flagUnsigned (columnFlags f)
+    !isUnsigned = flagUnsigned (columnFlags f)
     !isText = columnCharSet f /= 63
 
     intLexer bs = fst <$> LexInt.readSigned LexInt.readDecimal bs
