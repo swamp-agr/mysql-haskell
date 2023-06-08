@@ -188,7 +188,7 @@ getTextField f
         || t == mySQLTypeVarString
         || t == mySQLTypeString     = do
             !bs <- getLenEncBytes
-            pure $! (MySQLText . if isText then T.decodeUtf8 else id) bs
+            pure $! (if isText then MySQLText . T.decodeUtf8 else MySQLBytes) bs
 
     | t == mySQLTypeBit             = MySQLBit <$> (getBits =<< getLenEncInt)
 
