@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 {-|
 Module      : Database.MySQL.Base
 Description : Prelude of mysql-haskell
