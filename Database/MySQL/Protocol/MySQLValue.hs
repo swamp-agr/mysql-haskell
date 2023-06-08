@@ -273,9 +273,7 @@ getTextRow cs = forM cs $ \ c -> do
     p <- peek
     if p == 0xFB
     then skipN 1 >> return MySQLNull
-    else do
-      !f <- getTextField c
-      pure f
+    else c `seq` getTextField c
 {-# INLINE getTextRow #-}
 
 getTextRowVector :: V.Vector ColumnDef -> Get (V.Vector MySQLValue)
@@ -283,9 +281,7 @@ getTextRowVector cs = V.forM cs $ \ c -> do
     p <- peek
     if p == 0xFB
     then skipN 1 >> return MySQLNull
-    else do
-      !f <- getTextField c
-      pure f
+    else c `seq` getTextField c
 {-# INLINE getTextRowVector #-}
 
 --------------------------------------------------------------------------------
