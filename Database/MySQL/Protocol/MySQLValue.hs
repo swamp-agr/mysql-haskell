@@ -269,19 +269,23 @@ putInQuotes p = putCharUtf8 '\'' >> p >> putCharUtf8 '\''
 --------------------------------------------------------------------------------
 -- | Text row decoder
 getTextRow :: [ColumnDef] -> Get [MySQLValue]
-getTextRow fs = forM fs $ \ f -> do
+getTextRow cs = forM cs $ \ c -> do
     p <- peek
     if p == 0xFB
     then skipN 1 >> return MySQLNull
-    else getTextField f
+    else do
+      !f <- getTextField c
+      pure f
 {-# INLINE getTextRow #-}
 
 getTextRowVector :: V.Vector ColumnDef -> Get (V.Vector MySQLValue)
-getTextRowVector fs = V.forM fs $ \ f -> do
+getTextRowVector cs = V.forM cs $ \ c -> do
     p <- peek
     if p == 0xFB
     then skipN 1 >> return MySQLNull
-    else getTextField f
+    else do
+      !f <- getTextField c
+      pure f
 {-# INLINE getTextRowVector #-}
 
 --------------------------------------------------------------------------------

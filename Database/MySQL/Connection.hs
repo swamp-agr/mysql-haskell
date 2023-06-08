@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 {-|
 Module      : Database.MySQL.Connection
 Description : Connection managment
@@ -168,7 +170,7 @@ decodeInputStream is = Stream.makeInputStream $ do
                    Just bs' -> do let l = fromIntegral (B.length bs')
                                   if l >= k
                                   then do
-                                      let (a, rest) = B.splitAt (fromIntegral k) bs'
+                                      let (!a, rest) = B.splitAt (fromIntegral k) bs'
                                       unless (B.null rest) (Stream.unRead rest is')
                                       return $! L.fromChunks (reverse (a:acc))
                                   else do
