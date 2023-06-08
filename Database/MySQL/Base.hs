@@ -1,5 +1,3 @@
-{-# LANGUAGE BangPatterns #-}
-
 {-|
 Module      : Database.MySQL.Base
 Description : Prelude of mysql-haskell
@@ -171,7 +169,7 @@ query_ :: MySQLConn -> Query -> IO ([ColumnDef], InputStream [MySQLValue])
 query_ conn@(MySQLConn is os _ consumed) (Query qry) = do
     guardUnconsumed conn
     writeCommand (COM_QUERY qry) os
-    !p <- readPacket is
+    p <- readPacket is
     if isERR p
     then decodeFromPacket p >>= throwIO . ERRException
     else do
