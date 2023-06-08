@@ -185,15 +185,18 @@ getTextField f
         || t == mySQLTypeLongBlob
         || t == mySQLTypeBlob
         || t == mySQLTypeVarString
-        || t == mySQLTypeString     = (if isText then MySQLText . T.decodeUtf8 else MySQLBytes) <$> getLenEncBytes
+        || t == mySQLTypeString     = do
+            !bs <- getLenEncBytes
+            pure $! (MySQLText . if isText then T.decodeUtf8 else id) bs
 
     | t == mySQLTypeBit             = MySQLBit <$> (getBits =<< getLenEncInt)
 
     | otherwise                     = fail $ "Database.MySQL.Protocol.MySQLValue: missing text decoder for " ++ show t
   where
-    t = columnType f
-    isUnsigned = flagUnsigned (columnFlags f)
-    isText = columnCharSet f /= 63
+    !t = columnType f
+    !isUnsigned field = flagUnsigned (columnFlags f)
+    !isText = columnCharSet f /= 63
+
     intLexer bs = fst <$> LexInt.readSigned LexInt.readDecimal bs
     fracLexer bs = fst <$> LexFrac.readSigned LexFrac.readDecimal bs
     dateParser bs = do

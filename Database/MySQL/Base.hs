@@ -175,16 +175,16 @@ query_ conn@(MySQLConn is os _ consumed) (Query qry) = do
     if isERR p
     then decodeFromPacket p >>= throwIO . ERRException
     else do
-        !len <- getFromPacket getLenEncInt p
+        len <- getFromPacket getLenEncInt p
         fields <- replicateM len $ (decodeFromPacket <=< readPacket) is
-        !_ <- readPacket is -- eof packet, we don't verify this though
+        _ <- readPacket is -- eof packet, we don't verify this though
         writeIORef consumed False
         rows <- Stream.makeInputStream $ do
-            !q <- readPacket is
+            q <- readPacket is
             if  | isEOF q  -> writeIORef consumed True >> return Nothing
                 | isERR q  -> decodeFromPacket q >>= throwIO . ERRException
                 | otherwise -> Just <$> getFromPacket (getTextRow fields) q
-        return $! (fields, rows)
+        return (fields, rows)
 
 -- | 'V.Vector' version of 'query_'.
 --
