@@ -175,7 +175,7 @@ query_ conn@(MySQLConn is os _ consumed) (Query qry) = do
     else do
         len <- getFromPacket getLenEncInt p
         fields <- replicateM len $ (decodeFromPacket <=< readPacket) is
-        _ <- readPacket is -- eof packet, we don't verify this though
+        !_eof <- readPacket is -- eof packet, we don't verify this though
         writeIORef consumed False
         rows <- Stream.makeInputStream $ do
             q <- readPacket is

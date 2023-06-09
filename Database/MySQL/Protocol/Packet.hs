@@ -90,7 +90,7 @@ decodeFromPacket = getFromPacket get
 getFromPacket :: Get a -> Packet -> IO a
 getFromPacket g (Packet _ _ body) = case parseDetailLazy g body of
     Left  (buf, offset, errmsg) -> throwIO (DecodePacketFailed buf offset errmsg)
-    Right (_,   _,      r     ) -> return r
+    Right (!_,  !_,     !r     ) -> return r
 {-# INLINE getFromPacket #-}
 
 data DecodePacketException = DecodePacketFailed ByteString ByteOffset String

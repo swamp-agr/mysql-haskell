@@ -195,8 +195,8 @@ getTextField f
     | otherwise                     = fail $ "Database.MySQL.Protocol.MySQLValue: missing text decoder for " ++ show t
   where
     !t = columnType f
-    !isUnsigned = flagUnsigned (columnFlags f)
-    !isText = columnCharSet f /= 63
+    isUnsigned = flagUnsigned (columnFlags f)
+    isText = columnCharSet f /= 63
 
     intLexer bs = fst <$> LexInt.readSigned LexInt.readDecimal bs
     fracLexer bs = fst <$> LexFrac.readSigned LexFrac.readDecimal bs
@@ -204,20 +204,20 @@ getTextField f
         (yyyy, rest) <- LexInt.readDecimal bs
         (mm, rest') <- LexInt.readDecimal (B.unsafeTail rest)
         (dd, _) <- LexInt.readDecimal (B.unsafeTail rest')
-        return (fromGregorian yyyy mm dd)
+        return $! fromGregorian yyyy mm dd
 
     timeParser bs = do
         (hh, rest) <- LexInt.readDecimal bs
         (mm, rest') <- LexInt.readDecimal (B.unsafeTail rest)
         (ss, _) <- LexFrac.readDecimal (B.unsafeTail rest')
-        return (TimeOfDay hh mm ss)
+        return $! TimeOfDay hh mm ss
 
 
 feedLenEncBytes :: FieldType -> (t -> b) -> (ByteString -> Maybe t) -> Get b
 feedLenEncBytes typ con parser = do
     bs <- getLenEncBytes
     case parser bs of
-        Just v -> return (con v)
+        Just v -> return $! con v
         Nothing -> fail $ "Database.MySQL.Protocol.MySQLValue: parsing " ++ show typ ++ " failed, \
                           \input: " ++ BC.unpack bs
 {-# INLINE feedLenEncBytes #-}
